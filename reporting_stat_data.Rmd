@@ -1,0 +1,53 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(readxl)
+library(plotly)
+```
+
+```{r}
+dane <- read_excel("~/Downloads/rynek_pracy.xlsx")
+```
+
+```{r}
+firstup <- function(x) {
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  return(x)
+}
+```
+
+
+```{r}
+dane |>
+  # filter (rok == 2003) |>
+  plot_ly(x = ~stopa_bezrobocia,
+          y = ~przecietne_wynagrodzenie,
+          size = ~ludnosc_w_wieku_produkcyjnym,
+          hoverinfo = "text",
+          text = ~paste("|", firstup(wojewodztwo), 
+                         "<br>| Stopa Bezrobocia:",  stopa_bezrobocia, 
+                         "<br>| Przecientne wynagrodzenie:", przecietne_wynagrodzenie,
+                         "<br>| Ludność w wieku produkcyjnym:", ludnosc_w_wieku_produkcyjnym),
+          frame = ~rok) |>
+  add_markers() |>
+  layout(
+    xaxis = list(title = "Stopa bezrobocia (%)"),
+    yaxis = list(title = "Przecietne wynagrodzenie (PLN)"),
+    showlegend = FALSE
+  )
+
+```
+
+```{r}
+dane |>
+  plot_ly(
+    x = ~rok,
+    y = ~stopa_bezrobocia,
+    group = ~wojewodztwo
+  ) |>
+  add_lines()
+```
+
