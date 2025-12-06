@@ -6,6 +6,7 @@ output: html_notebook
 ```{r}
 library(readxl)
 library(plotly)
+library(crosstalk)
 ```
 
 ```{r}
@@ -43,11 +44,22 @@ dane |>
 
 ```{r}
 dane |>
+  SharedData$new(key = ~wojewodztwo) |>
   plot_ly(
     x = ~rok,
     y = ~stopa_bezrobocia,
-    group = ~wojewodztwo
+    color = ~region,
+    hoverinfo = text,
+    text = ~paste (firstup(wojewodztwo),
+                   "<br>Rok:", rok,
+                   "<br>Stopa bezrobocia:", stopa_bezrobocia)
   ) |>
-  add_lines()
+  group_by(wojewodztwo) |>
+  add_lines() |>
+  layout(
+  xaxis = list(title = "Lata"),
+  yaxis = list(title = "Stopa bezrobocia (%)"),
+  showlegend = FALSE
+  )
 ```
 
