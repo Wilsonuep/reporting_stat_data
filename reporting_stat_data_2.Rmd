@@ -4,6 +4,47 @@ output: html_notebook
 ---
 
 ```{r}
+library(readxl)
+library(dplyr)
+library(gt)
+library(janitor) #pakiety do czyszczenia danych
+library(tidyr) #pakiety do czyszczenia danych
+library(gtExtras)
+```
 
+```{r}
+dane <-
+  read_xlsx("~/Downloads/RYNE_4089_XPIV_20241120134913.xlsx",
+            sheet = 2) |>
+    clean_names()
+```
+
+Przygotuj dane na temat wskaźnika zatrudnienia w podziale na woj, rok, plec
+
+```{r}
+tablica <- dane |>
+  mutate(wskaznik = wartosc/sum(wartosc), .by = c(nazwa,rok,plec)) |>
+  filter(typy_aktywnosci == "aktywni zawodowo pracujący") |>
+  filter(nazwa != "POLSKA") |>
+  select(nazwa, rok, plec, wskaznik) |>
+  pivot_wider(values_from = wskaznik, names_from = c(plec, rok)) |>
+  clean_names()
+
+print(tablica)
+```
+
+```{r}
+tablica |>
+  gt() |>
+  tab_spanner(label = "MĘŻCZYŹNI", columns = starts_with("mezczyzni")) |>
+  tab_spanner(label = "KOBIETY", columns = starts_with("kobiety")) |>
+  cols_label(1 ~ "WOJEWÓDZTWO", 2~2021, 3~2022, 4~2023, 5~2021, 6~2022, 7~2023) |>
+  fmt_number(scale_by = 100, decimals = 1) |>
+  data_color(columns = where(is.numeric), palette = "Blues", domain= c(0.4, 0.7)) |>
+  gt_theme_538() |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = list(cells_column_labels(), cells_column_spanners())
+  )
 ```
 
